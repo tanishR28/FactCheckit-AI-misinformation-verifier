@@ -10,6 +10,8 @@ google-generativeai==0.3.2
 # HTTP Requests
 aiohttp==3.9.1
 requests==2.31.0
+beautifulsoup4==4.12.2
+lxml==5.1.0
 
 # Environment Variables
 python-dotenv==1.0.0

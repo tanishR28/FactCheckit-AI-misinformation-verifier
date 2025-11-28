@@ -1,5 +1,6 @@
 from app.tools.google_factcheck import search_fact_check_api
 from app.tools.google_search import search_google
+from app.tools.web_scraper import scrape_news_search, scrape_news_api
 from app.agents.research_agent import analyze_with_gemini
 from app.utils.preprocess import clean_text
 import asyncio
@@ -18,14 +19,18 @@ async def verify_claim(claim: str) -> dict:
         # Clean the claim
         cleaned_claim = clean_text(claim)
         
-        # Run verification tools in parallel
+        # Run verification tools in parallel (Google APIs + Web Scraper as backup)
         fact_check_task = search_fact_check_api(cleaned_claim)
         google_search_task = search_google(cleaned_claim)
+        web_scraper_task = scrape_news_search(cleaned_claim)
+        news_api_task = scrape_news_api(cleaned_claim)
         
         # Wait for all results
-        fact_check_results, google_results = await asyncio.gather(
+        fact_check_results, google_results, scraper_results, news_results = await asyncio.gather(
             fact_check_task,
             google_search_task,
+            web_scraper_task,
+            news_api_task,
             return_exceptions=True
         )
         
@@ -38,9 +43,24 @@ async def verify_claim(claim: str) -> dict:
             print(f"Google Search error: {google_results}")
             google_results = {"results": [], "error": str(google_results)}
         
-        # Use Gemini AI to analyze search results
-        search_results = google_results.get("results", [])
-        ai_analysis = await analyze_with_gemini(cleaned_claim, search_results)
+        if isinstance(scraper_results, Exception):
+            print(f"Web scraper error: {scraper_results}")
+            scraper_results = {"results": [], "error": str(scraper_results)}
+            
+        if isinstance(news_results, Exception):
+            print(f"NewsAPI error: {news_results}")
+            news_results = {"results": [], "error": str(news_results)}
+        
+        # Combine all search results (Google + Scraper + NewsAPI)
+        all_search_results = []
+        all_search_results.extend(google_results.get("results", []))
+        all_search_results.extend(scraper_results.get("results", []))
+        all_search_results.extend(news_results.get("results", []))
+        
+        print(f"Total search results: {len(all_search_results)} (Google: {len(google_results.get('results', []))}, Scraper: {len(scraper_results.get('results', []))}, NewsAPI: {len(news_results.get('results', []))})")
+        
+        # Use Gemini AI to analyze all search results
+        ai_analysis = await analyze_with_gemini(cleaned_claim, all_search_results)
         
         # Compile verification results
         verification_results = {
@@ -48,15 +68,16 @@ async def verify_claim(claim: str) -> dict:
             "cleaned_claim": cleaned_claim,
             "fact_check_api": fact_check_results,
             "google_search": google_results,
+            "web_scraper": scraper_results,
+            "news_api": news_results,
             "ai_analysis": ai_analysis,
             "verification_summary": {
                 "fact_check_found": len(fact_check_results.get("claims", [])) > 0,
                 "google_results_count": len(google_results.get("results", [])),
+                "scraper_results_count": len(scraper_results.get("results", [])),
+                "news_results_count": len(news_results.get("results", [])),
                 "ai_confidence": ai_analysis.get("confidence", 0.0),
-                "total_sources": (
-                    len(fact_check_results.get("claims", [])) + 
-                    len(google_results.get("results", []))
-                )
+                "total_sources": len(all_search_results) + len(fact_check_results.get("claims", []))
             }
         }
         

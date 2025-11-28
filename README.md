@@ -6,6 +6,10 @@
 
 A simple, clean, user-friendly web application where users can paste any news headline or claim and instantly see whether it's TRUE, FALSE, MISLEADING, or UNVERIFIED.
 
+**🚀 Powered by 100% AI - No Hardcoded Database! 🚀**
+
+**Real-time Web Search + Intelligent AI Analysis = Latest News Verification**
+
 </div>
 
 ---
@@ -31,7 +35,9 @@ copy .env.example .env
 
 # Edit .env and add your API key
 notepad .env
-# Add this line: GEMINI_API_KEY=your_api_key_here
+# Add: GEMINI_API_KEY=your_api_key_here
+# Optional: GOOGLE_SEARCH_ENGINE_ID=your_search_id (for Google Search)
+# Optional: NEWS_API_KEY=your_news_key (from newsapi.org)
 
 # Start backend
 python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
@@ -60,19 +66,21 @@ npm run dev
 ### Step 4: Test It!
 
 1. Open: http://localhost:3000
-2. Paste: `COVID-19 vaccines contain microchips`
+2. Paste: `Virat Kohli announces retirement from all formats`
 3. Click "Verify Claim"
-4. See results! 🎉
+4. See AI-powered results with latest news! 🎉
 
 ---
 
 ## 🎯 Purpose
 
 Help people understand real verified news during crises by using:
-- Google's Gemini AI (for intelligent analysis)
-- Google Fact Check Tools API
-- Google Custom Search
-- 100% AI-powered verification (NO hardcoded database!)
+- **Google Gemini 2.5 Flash AI** - Latest AI model for intelligent analysis
+- **Web Scraping** - DuckDuckGo search (works without API setup!)
+- **Google Fact Check Tools API** - Optional for enhanced accuracy
+- **Google Custom Search API** - Optional for more sources
+- **NewsAPI** - Optional for latest news articles
+- **100% AI-powered verification** - NO hardcoded database!
 
 ## ✨ Features
 
@@ -88,10 +96,12 @@ Help people understand real verified news during crises by using:
 
 ### Backend (FastAPI + Gemini AI)
 - 🤖 **100% AI-Powered**: NO hardcoded facts - all verdicts from real-time AI analysis
-- 🧠 **Intelligent Research**: Gemini AI reads and analyzes web search results
-- 🔍 **Multi-Source Verification**: Cross-references fact-checkers + web searches
-- 📊 **Smart Verdict**: AI makes evidence-based decisions with confidence scores
-- 💡 **Human-Friendly**: Clear AI-generated explanations with sources
+- 🕷️ **Web Scraping**: Automatically scrapes DuckDuckGo for latest news (no API needed!)
+- 🧠 **Intelligent Research**: Gemini AI reads and understands web content
+- 🔍 **Multi-Source Verification**: Combines fact-checkers, search engines, and news APIs
+- 📊 **Smart Verdict**: AI weighs evidence and provides confidence scores
+- 💡 **Human-Friendly**: Clear explanations with source citations
+- ⚡ **Works Without APIs**: Web scraper as fallback when APIs fail
 
 ## 🛠️ Tech Stack
 
@@ -101,11 +111,11 @@ Help people understand real verified news during crises by using:
 - Axios (API requests)
 
 ### Backend
-- FastAPI (Python web framework)
-- Google Gemini AI (Claim extraction & explanation)
-- Google Fact Check Tools API
-- Google Custom Search API
-- aiohttp (Async HTTP requests)
+- **FastAPI** - High-performance Python web framework
+- **Google Gemini 2.5 Flash** - Latest AI model for analysis
+- **BeautifulSoup4** - Web scraping for DuckDuckGo
+- **aiohttp** - Async HTTP requests
+- **Optional APIs**: Google Fact Check, Custom Search, NewsAPI
 
 ## 📁 Project Structure
 
@@ -138,9 +148,10 @@ factcheckit/
     │   │   ├── research_agent.py       # NEW! AI analyzes web results
     │   │   ├── verdict_agent.py        # Determine verdict
     │   │   └── explanation_agent.py    # Generate explanations
-    │   ├── tools/
-    │   │   ├── google_factcheck.py
-    │   │   └── google_search.py
+    │   ├── tools/               # Verification Tools
+    │   │   ├── google_factcheck.py     # Fact Check API (optional)
+    │   │   ├── google_search.py        # Custom Search API (optional)
+    │   │   └── web_scraper.py          # DuckDuckGo scraper + NewsAPI
     │   ├── models/
     │   │   ├── request_model.py
     │   │   └── response_model.py
@@ -165,17 +176,21 @@ factcheckit/
 - Uvicorn 0.27.0
 - Google Generative AI 0.3.2
 - aiohttp 3.9.1
+- BeautifulSoup4 4.14.2 (web scraping)
+- lxml 6.0.2 (HTML parsing)
 - python-dotenv 1.0.0
 
 **Environment Variables (.env):**
 ```env
-# Required
-GEMINI_API_KEY=your_key_here
+# Required (Only 1 key needed!)
+GEMINI_API_KEY=your_gemini_api_key
 
-# Optional (for enhanced features)
-GOOGLE_FACT_CHECK_API_KEY=your_key
-GOOGLE_SEARCH_API_KEY=your_key
-GOOGLE_SEARCH_ENGINE_ID=your_id
+# Optional - For Enhanced Features
+GOOGLE_SEARCH_ENGINE_ID=your_search_engine_id  # From programmablesearchengine.google.com
+NEWS_API_KEY=your_news_api_key                 # From newsapi.org (100 free/day)
+
+# Note: Google APIs use same GEMINI_API_KEY above
+# App works with ONLY Gemini key using web scraper!
 ```
 
 **Running Backend:**
@@ -238,21 +253,28 @@ graph LR
 
 2. **Verification Agent**
    - Parallel checking across multiple sources:
-     - Google Fact Check Tools API
-     - Google Custom Search (with "fact check" query)
-     - Local JSON database (similarity matching)
+     - DuckDuckGo Web Scraper (no API needed!)
+     - Google Fact Check Tools API (optional)
+     - Google Custom Search (optional)
+     - NewsAPI for latest articles (optional)
 
-3. **Verdict Agent**
-   - Analyzes all verification results
-   - Weighs evidence from each source
+3. **Research Agent** (NEW!)
+   - Uses Gemini AI to analyze search results
+   - Reads and understands web content
+   - Makes intelligent verdicts based on evidence
+   - Works even when APIs are unavailable
+
+4. **Verdict Agent**
+   - Combines AI analysis with fact-checker data
+   - Weighs evidence from multiple sources
    - Calculates confidence score
    - Determines verdict: TRUE/FALSE/MISLEADING/UNVERIFIED
 
-4. **Explanation Agent** (Gemini AI)
+5. **Explanation Agent** (Gemini AI)
    - Generates human-friendly summary
-   - Creates 2-3 evidence points
-   - Provides source citations
-   - Explains reasoning
+   - Creates 2-3 evidence points with sources
+   - Provides detailed explanations
+   - Shows AI reasoning process
 
 ## 📸 Usage
 
@@ -325,23 +347,22 @@ graph LR
 }
 ```
 
-## 🧪 TEST CLAIMS (Pre-loaded in Database)
+## 🧪 TEST CLAIMS (Try These!)
 
-### FALSE Claims:
+### Current News Claims:
+- `Virat Kohli announces retirement from all formats`
+- `MS Dhoni becomes India's new Test captain`
+- `India wins World Cup 2024`
+- `Tesla stock reaches $1000`
+- `Scientists discover cure for all cancers`
+
+### Classic False Claims:
 - `COVID-19 vaccines contain microchips`
 - `5G technology causes COVID-19`
 - `The Earth is flat`
-- `Vaccines cause autism`
-- `Drinking bleach cures COVID-19`
-- `The moon landing was faked`
 - `Climate change is a hoax`
 
-### TRUE Claims:
-- `The COVID-19 pandemic began in late 2019 in Wuhan, China`
-
-### MISLEADING Claims:
-- `Drinking water prevents all diseases`
-- `Eating carrots improves night vision`
+**Note:** App now uses real-time web search - test with any recent news!
 
 ## 🐛 TROUBLESHOOTING
 
@@ -384,33 +405,33 @@ npm install
 ### API Returns "UNVERIFIED"
 
 This is normal if:
-1. Claim is not in local database
-2. External APIs (Fact Check, Google Search) are not configured
+1. No search results found (very obscure claim)
+2. Web scraper blocked by site
 3. Gemini AI couldn't find strong evidence
+4. Claim is too recent (within last few hours)
 
-**Solution:** Test with pre-loaded claims listed above!
+**Solution:** 
+- Try different claims
+- Check backend terminal for scraper status
+- Enable Google APIs for better results
+- Wait a few minutes if news is very recent
 
 ## 🎨 CUSTOMIZATION
 
-### Adding More Facts to Database
+### Enable NewsAPI (100 Free Requests/Day)
 
-Edit `backend/app/data/facts.json`:
+1. Get free key: https://newsapi.org/register
+2. Add to `.env`: `NEWS_API_KEY=your_key`
+3. Restart backend
+4. Get latest news articles automatically!
 
-```json
-{
-  "facts": [
-    {
-      "claim": "Your claim here",
-      "verdict": "FALSE",
-      "explanation": "Why it's false",
-      "source": "Source name",
-      "date_added": "2025-01-15"
-    }
-  ]
-}
-```
+### Enable Google Custom Search
 
-Verdicts: `TRUE`, `FALSE`, `MISLEADING`, `UNVERIFIED`
+1. Create search engine: https://programmablesearchengine.google.com/
+2. Get Search Engine ID (cx parameter)
+3. Add to `.env`: `GOOGLE_SEARCH_ENGINE_ID=your_id`
+4. Enable API: https://console.developers.google.com/apis/api/customsearch.googleapis.com
+5. Restart backend
 
 ### Changing UI Colors
 
@@ -510,15 +531,17 @@ factcheckit/
 
 ## 🎯 HOW IT WORKS
 
-1. **User Input** → Paste claim
-2. **Claim Extraction** → Gemini AI cleans it
-3. **Verification** → Parallel checks:
-   - Google Fact Check API
-   - Google Search
-   - Local Database (similarity matching)
-4. **Verdict** → Smart scoring algorithm
-5. **Explanation** → Gemini AI generates summary
-6. **Display** → Color-coded results
+1. **User Input** → Paste any claim or news headline
+2. **Claim Extraction** → Gemini AI extracts clean factual statement
+3. **Multi-Source Verification** → Parallel searches:
+   - 🕷️ **DuckDuckGo Web Scraper** (always works, no API!)
+   - 📰 **NewsAPI** (if configured - latest news)
+   - ✓ **Google Fact Check** (if configured - verified claims)
+   - 🔍 **Google Search** (if configured - more sources)
+4. **AI Analysis** → Gemini reads and analyzes all search results
+5. **Smart Verdict** → AI weighs evidence and determines TRUE/FALSE/MISLEADING
+6. **Explanation** → Gemini generates human-friendly summary with sources
+7. **Display** → Color-coded results with confidence score
 
 ## 📝 License
 
