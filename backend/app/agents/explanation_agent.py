@@ -26,7 +26,7 @@ async def generate_explanation(
         Dictionary with explanation, evidence, and sources
     """
     try:
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-3.1-flash-lite')
         
         # Prepare context from verification results
         fact_check_claims = verification_results.get("fact_check_api", {}).get("claims", [])

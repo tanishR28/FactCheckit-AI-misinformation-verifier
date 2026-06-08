@@ -18,7 +18,7 @@ async def extract_claim(user_input: str) -> str:
         A clean, factual statement that can be verified
     """
     try:
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-3.1-flash-lite')
         
         prompt = f"""You are a claim extraction expert. Your job is to convert user input into a clear, verifiable factual claim.
 

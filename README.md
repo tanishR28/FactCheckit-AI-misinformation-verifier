@@ -167,7 +167,7 @@ FASTAPI_PORT=8000
 
 5. **Run backend server**
 ```bash
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 6. **API available at**

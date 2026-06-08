@@ -54,7 +54,7 @@ Guidelines:
 Return ONLY the JSON, no additional text."""
 
             try:
-                model = genai.GenerativeModel('gemini-2.5-flash')
+                model = genai.GenerativeModel('gemini-3.1-flash-lite')
                 response = model.generate_content(fallback_prompt)
                 response_text = response.text.strip()
                 
@@ -133,7 +133,7 @@ Guidelines:
 Be objective and evidence-based. Return ONLY the JSON, no additional text."""
 
         # Call Gemini
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-3.1-flash-lite')
         response = model.generate_content(prompt)
         
         # Parse JSON response
